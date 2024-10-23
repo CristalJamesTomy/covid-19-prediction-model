@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19 Severity Prediction</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { 
+            color: #333; 
+            font-size: 2.5em;
+        }
+        form { 
+            width: 80%; 
+            max-width: 800px; 
+            margin: 20px auto; 
+        }
+        fieldset { 
+            margin-bottom: 20px; 
+            border: 2px solid #ddd; 
+            padding: 20px; 
+            border-radius: 10px;
+        }
+        legend { 
+            font-weight: bold; 
+            font-size: 1.2em;
+            padding: 0 10px;
+        }
+        label { 
+            display: block; 
+            margin-bottom: 10px; 
+            font-size: 1.1em;
+        }
+        input[type="checkbox"], input[type="radio"] { 
+            margin-right: 10px; 
+            transform: scale(1.5);
+        }
+        input[type="submit"], button { 
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 15px 25px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 1.2em;
+            border-radius: 5px;
+            margin-top: 10px; /* Space above the button */
+        }
+        input[type="submit"]:hover, button:hover { 
+            background-color: #45a049; 
+        }
+        #result { 
+            font-weight: bold; 
+            margin-top: 40px; 
+            font-size: 60px;
+            text-align: center;
+        }
+        #radar-chart {
+            width: 100px; /* Adjusted width */
+            height: 100px; /* Adjusted height */
+            transform: scale(0.7); /* Scale down the chart */
+            transform-origin: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>COVID-19 Severity Prediction</h1>
+    <form method="POST">
+        <fieldset>
+            <legend>Symptoms</legend>
+            <label><input type="checkbox" name="symptoms" value="Fever"> Fever</label>
+            <label><input type="checkbox" name="symptoms" value="Tiredness"> Tiredness</label>
+            <label><input type="checkbox" name="symptoms" value="Dry-Cough"> Dry Cough</label>
+            <label><input type="checkbox" name="symptoms" value="Difficulty-in-Breathing"> Difficulty in Breathing</label>
+            <label><input type="checkbox" name="symptoms" value="Sore-Throat"> Sore Throat</label>
+            <label><input type="checkbox" name="symptoms" value="Pains"> Pains</label>
+            <label><input type="checkbox" name="symptoms" value="Nasal-Congestion"> Nasal Congestion</label>
+            <label><input type="checkbox" name="symptoms" value="Runny-Nose"> Runny Nose</label>
+            <label><input type="checkbox" name="symptoms" value="Diarrhea"> Diarrhea</label>
+        </fieldset>
+
+        <fieldset>
+            <legend>Age Group</legend>
+            <label><input type="radio" name="age" value="Age_0-9" required> 0-9</label>
+            <label><input type="radio" name="age" value="Age_10-19"> 10-19</label>
+            <label><input type="radio" name="age" value="Age_20-24"> 20-24</label>
+            <label><input type="radio" name="age" value="Age_25-59"> 25-59</label>
+            <label><input type="radio" name="age" value="Age_60+"> 60+</label>
+        </fieldset>
+
+        <fieldset>
+            <legend>Gender</legend>
+            <label><input type="radio" name="gender" value="Gender_Female" required> Female</label>
+            <label><input type="radio" name="gender" value="Gender_Male"> Male</label>
+            <label><input type="radio" name="gender" value="Gender_Transgender"> Transgender</label>
+        </fieldset>
+
+        <fieldset>
+            <legend>Contact with COVID-19 Patient</legend>
+            <label><input type="radio" name="contact" value="Contact_Yes" required> Yes</label>
+            <label><input type="radio" name="contact" value="Contact_No"> No</label>
+            <label><input type="radio" name="contact" value="Contact_Dont-Know"> Don't Know</label>
+        </fieldset>
+
+        <input type="submit" name="predict" value="Predict">
+        <button type="submit" name="show_graph">Show Symptom Frequency Graph</button> <!-- Button to show the graph -->
+    </form>
+
+    {% if result %}
+    <div id="result">
+        {{ result }}
+    </div>
+    {% endif %}
+
+    {% if radar_data and show_graph %}
+    <canvas id="radar-chart"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('radar-chart').getContext('2d');
+        const radarData = {{ radar_data|tojson }};
+        const labels = Object.keys(radarData);
+        const dataValues = Object.values(radarData);
+
+        const myRadarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Symptom Data',
+                    data: dataValues,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scale: {
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    {% endif %}
+</body>
+</html>
